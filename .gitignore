@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+env.bak/
+node_modules/
+*.log
+*.sqlite3
+.DS_Store
+.env
+frontend/.next/
+frontend/out/
