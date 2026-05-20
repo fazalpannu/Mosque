@@ -7,9 +7,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.database import Base
 from app.models.mosque import Mosque
+from app.core.config import settings
 
 config = context.config
 fileConfig(config.config_file_name)
+
+# Ensure Alembic uses the same database URL as the application settings
+db_url = os.getenv("DATABASE_URL") or settings.database_url
+config.set_main_option("sqlalchemy.url", db_url)
 
 target_metadata = Base.metadata
 

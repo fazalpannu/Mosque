@@ -1,4 +1,6 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, status
+﻿import logging
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
@@ -7,15 +9,18 @@ from app.schemas.mosque import Mosque as MosqueSchema, MosqueCreate, MosqueUpdat
 from app.auth.jwt_handler import get_current_admin
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/mosques", response_model=List[MosqueSchema])
 def read_mosques(db: Session = Depends(get_db)):
+    logger.info("Fetching all mosques")
     return db.query(Mosque).order_by(Mosque.created_at.desc()).all()
 
 
 @router.get("/mosques/{mosque_id}", response_model=MosqueSchema)
 def read_mosque(mosque_id: int, db: Session = Depends(get_db)):
+    logger.info("Fetching mosque id=%s", mosque_id)
     mosque = db.query(Mosque).filter(Mosque.id == mosque_id).first()
     if mosque is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mosque not found")
@@ -24,10 +29,12 @@ def read_mosque(mosque_id: int, db: Session = Depends(get_db)):
 
 @router.post("/mosques", response_model=MosqueSchema, status_code=status.HTTP_201_CREATED, dependencies=[Depends(get_current_admin)])
 def create_mosque(mosque_in: MosqueCreate, db: Session = Depends(get_db)):
+    logger.info("Creating mosque: %s", mosque_in.dict())
     mosque = Mosque(**mosque_in.dict())
     db.add(mosque)
     db.commit()
     db.refresh(mosque)
+    logger.info("Created mosque id=%s", mosque.id)
     return mosque
 
 
@@ -36,10 +43,12 @@ def update_mosque(mosque_id: int, mosque_in: MosqueUpdate, db: Session = Depends
     mosque = db.query(Mosque).filter(Mosque.id == mosque_id).first()
     if mosque is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mosque not found")
+    logger.info("Updating mosque id=%s with %s", mosque_id, mosque_in.dict())
     for field, value in mosque_in.dict().items():
         setattr(mosque, field, value)
     db.commit()
     db.refresh(mosque)
+    logger.info("Updated mosque id=%s", mosque_id)
     return mosque
 
 
@@ -48,6 +57,8 @@ def delete_mosque(mosque_id: int, db: Session = Depends(get_db)):
     mosque = db.query(Mosque).filter(Mosque.id == mosque_id).first()
     if mosque is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mosque not found")
+    logger.info("Deleting mosque id=%s", mosque_id)
     db.delete(mosque)
     db.commit()
+    logger.info("Deleted mosque id=%s", mosque_id)
     return None
