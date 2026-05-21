@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { API_BASE_URL } from "../../../lib/apiBaseUrl";
 
 async function getMosque(id) {
-  const res = await fetch(`http://127.0.0.1:8000/mosques/${id}`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE_URL}/mosques/${id}`, { cache: "no-store" });
   if (!res.ok) return null;
   return res.json();
 }

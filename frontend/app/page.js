@@ -1,7 +1,8 @@
 ﻿import MosqueCard from "../components/MosqueCard";
+import { API_BASE_URL } from "../lib/apiBaseUrl";
 
 async function getMosques() {
-  const res = await fetch("http://127.0.0.1:8000/mosques", { cache: "no-store" });
+  const res = await fetch(`${API_BASE_URL}/mosques`, { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
 }
